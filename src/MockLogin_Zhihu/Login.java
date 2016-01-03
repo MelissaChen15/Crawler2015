@@ -1,9 +1,4 @@
-package MockLogin_Douban;
-
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+package MockLogin_Zhihu;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -18,29 +13,28 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-
 public class Login {  
     // The configuration items  
-    private static String userName = "13918162228@163.com";  
+    private static String userName = "1391816228@163.com";  
     private static String password = "720312xy";  
-//    private static String redirectURL = "http://www.douban.com/people/138761300/";  
+//    private static String redirectURL = "http://blog.renren.com/blog/304317577/449470467";  
   
-    private static String LoginURL = "http://www.douban.com/accounts/login?source=movie";  
+    // Don't change the following URL  
+    private static String LoginURL = "https://www.zhihu.com/#signin";  
   
-    // 在同一个会话中使用cookies
+    // The HttpClient is used in one session  
     private HttpResponse response;  
     private DefaultHttpClient httpclient = new DefaultHttpClient();  
   
-	private  boolean login() {  
+    private boolean login() {  
         HttpPost httpost = new HttpPost(LoginURL);  
-        //post参数设置
+        // All the parameters post to the web site  
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();  
- //source=movie&redir=http%3A%2F%2Fwww.douban.com&form_email=13918162228%40163.com&form_password=720312xy&login=%E7%99%BB%E5%BD%95
-        nvps.add(new BasicNameValuePair("source", "movie"));  
-        nvps.add(new BasicNameValuePair("redir", "http%3A%2F%2Fwww.douban.com"));  
-        nvps.add(new BasicNameValuePair("form_email", userName));  
-        nvps.add(new BasicNameValuePair("form_password", password));  
-        nvps.add(new BasicNameValuePair("login", "%E7%99%BB%E5%BD%95"));  
+        nvps.add(new BasicNameValuePair("_xsrf", "4c1e26b705608a1cdfc123198e25d9ba"));  
+        nvps.add(new BasicNameValuePair("email", userName));  
+        nvps.add(new BasicNameValuePair("password", password));  
+        nvps.add(new BasicNameValuePair("remember_me", "true"));  
+
         try {  
             httpost.setEntity(new UrlEncodedFormEntity(nvps));  
             response = httpclient.execute(httpost);  
@@ -55,7 +49,6 @@ public class Login {
   
     private String getRedirectLocation() {  
         Header locationHeader = response.getFirstHeader("Location");  
-        System.out.println(response.getFirstHeader("Location"));
         if (locationHeader == null) {  
             return null;  
         }  
@@ -64,6 +57,7 @@ public class Login {
   
     private String getText(String redirectLocation) {  
         HttpGet httpget = new HttpGet(redirectLocation);  
+        // Create a response handler  
         ResponseHandler<String> responseHandler = new BasicResponseHandler();  
         String responseBody = "";  
         try {  
@@ -78,36 +72,21 @@ public class Login {
         return responseBody;  
     }  
   
-    public void save(String filePath ) {  
+    public void printText() {  
         if (login()) {  
             String redirectLocation = getRedirectLocation();  
+            if(redirectLocation == null)
+            	redirectLocation = "https://www.zhihu.com/people/chen-mei-ying-72";
             if (redirectLocation != null) {  
-//                System.out.println(getText(redirectLocation));  
-            	try{
-            			DataOutputStream out = new DataOutputStream(new FileOutputStream(
-            					new File(filePath)));
-            			for (int i = 0; i < getText(redirectLocation).getBytes().length; i++)
-            				out.write(getText(redirectLocation).getBytes()[i]);
-            				out.flush();
-            				out.close();
-            		}
-            		catch (IOException e){
-            			e.printStackTrace();
-            		}
-            	}
+                System.out.println(getText(redirectLocation));  
             }  
         }  
+    }  
+  
+    public static void main(String[] args) {  
+        Login renRen = new Login();  
+        renRen.printText();  
+    }  
 }  
-
-
-
-
-
-
-
-
-
-
-
-
+  
 
